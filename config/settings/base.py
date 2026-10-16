@@ -24,7 +24,7 @@ environ.Env.read_env(BASE_DIR / ".env")
 # Required in production (enforced there); dev/test provide a throwaway fallback.
 SECRET_KEY = env.str("SECRET_KEY", default="")
 DEBUG = env.bool("DEBUG", default=False)
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
+ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["tenancy-be.vercel.app"],)
 
 DJANGO_APPS = [
     # daphne first: it makes `runserver` an ASGI server (HTTP + WebSocket) in development.
