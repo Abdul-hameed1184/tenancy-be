@@ -28,6 +28,7 @@ from typing import ClassVar
 from django.db import connection, transaction
 from django.utils import timezone
 
+from .uuids import uuid7
 from .models import OutboxEvent
 
 logger = logging.getLogger(__name__)
@@ -40,7 +41,7 @@ class DomainEvent:
     name: ClassVar[str]
     aggregate_type: ClassVar[str]
 
-    event_id: uuid.UUID = dataclasses.field(default_factory=uuid.uuid7)
+    event_id: uuid.UUID = dataclasses.field(default_factory=uuid7)
     occurred_at: datetime = dataclasses.field(default_factory=timezone.now)
 
     @property

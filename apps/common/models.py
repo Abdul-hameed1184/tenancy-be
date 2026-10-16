@@ -1,6 +1,6 @@
-import uuid
-
 from django.db import models
+
+from .uuids import uuid7
 
 
 class UUIDModel(models.Model):
@@ -12,7 +12,7 @@ class UUIDModel(models.Model):
     to the right edge of the B-tree index instead of causing random page splits.
     """
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid7, editable=False)
+    id = models.UUIDField(primary_key=True, default=uuid7, editable=False)
 
     class Meta:
         abstract = True

@@ -5,6 +5,7 @@ from django.conf import settings
 from django.db import IntegrityError, connection
 
 from apps.accounts.models import User
+from apps.common.uuids import uuid7
 
 pytestmark = pytest.mark.django_db
 
@@ -46,7 +47,7 @@ def test_database_rejects_uppercase_email_written_without_the_model():
         "avatar_url, phone, is_active, is_staff, created_at) "
         "VALUES (%s, %s, false, %s, %s, %s, %s, %s, true, false, now())"
     )
-    params = [uuid.uuid7(), "", "Mixed@Case.com", "x", "tenant", "", ""]
+    params = [uuid7(), "", "Mixed@Case.com", "x", "tenant", "", ""]
     with pytest.raises(IntegrityError), connection.cursor() as cursor:
         cursor.execute(sql, params)
 
