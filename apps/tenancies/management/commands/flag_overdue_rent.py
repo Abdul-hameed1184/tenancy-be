@@ -6,7 +6,10 @@ class Command(BaseCommand):
     help = "Flag overdue rent"
 
     def handle(self, *args, **options):
-        flag_overdue_rent()
+        created = flag_overdue_rent()
         self.stdout.write(
-            self.style.SUCCESS("Overdue rent processing completed.")
+            self.style.SUCCESS(
+                f"Overdue rent processing completed. "
+                f"{created} new notifications created."
+            )
         )

@@ -5,14 +5,13 @@ from apps.payments.tasks import send_rent_due_reminders
 
 
 class Command(BaseCommand):
-    help = "Create notifications for rent due within seven days"
+    help = "Send rent due reminders"
 
     def handle(self, *args, **options):
         created = send_rent_due_reminders()
-
         self.stdout.write(
             self.style.SUCCESS(
-                f"Rent due reminder job completed. "
-                f"Notifications created: {created}"
+                f"Rent due reminders completed. "
+                f"{created} new notifications created."
             )
         )
