@@ -16,6 +16,8 @@ Logical databases: 0 = Celery broker/results, 1 = cache/throttles/WS tickets,
 2 = channel layer. Key prefixes: "pleet:" (cache), "pleet:channels" (channel layer).
 """
 
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 
 
