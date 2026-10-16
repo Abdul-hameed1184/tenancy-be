@@ -1,12 +1,36 @@
+
 [project]
 name = "tenancy-backend"
 version = "0.1.0"
 requires-python = ">=3.12,<3.13"
+dependencies = [
+    "Django>=5.2,<5.3",
+    "djangorestframework>=3.16,<4",
+    "djangorestframework-simplejwt>=5.5,<6",
+    "django-environ>=0.12,<1",
+    "django-cors-headers>=4.7,<5",
+    "django-filter>=25.1",
+    "drf-spectacular>=0.28,<1",
+    "dj-database-url",
+    "psycopg[binary]>=3.2,<4",
+    "argon2-cffi>=23.1",
+    "whitenoise>=6.8",
+    "channels[daphne]>=4.2,<5",
+    "channels-redis>=4.2,<5",
+    "redis>=5.2",
+    "django-redis>=5.4",
+    "celery[redis]>=5.5,<6",
+    "django-celery-beat>=2.8,<3",
+    "gunicorn>=23",
+    "uvicorn[standard]>=0.34",
+    "uvicorn-worker>=0.3",
+]
 
 [tool.ruff]
 line-length = 100
 target-version = "py312"
 extend-exclude = ["venv", "staticfiles", "media"]
+
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "DJ", "SIM", "RUF", "S"]
