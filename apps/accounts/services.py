@@ -207,20 +207,47 @@ def make_reset_token(user: User) -> str:
     return f"{uid}.{default_token_generator.make_token(user)}"
 
 
+# def request_password_reset(email: str, request=None) -> None:
+#     """Always succeeds from the caller's point of view (no account enumeration)."""
+#     user = User.objects.filter(email=User.objects.normalize_email(email), is_active=True).first()
+#     if user is None or not user.has_usable_password():
+#         return
+#     record(Action.PASSWORD_RESET_REQUESTED, actor=None, entity=user, request=request)
+#     # Queued, not sent inline: response time no longer differs between known and unknown
+#     # emails, and SMTP failures are retried by the worker.
+#     from .tasks import send_password_reset_email
+
+#     try:
+#         send_password_reset_email.delay(str(user.pk))
+#     except Exception:
+#         logger.exception("Could not queue password reset email", extra={"user_id": str(user.pk)})
+
 def request_password_reset(email: str, request=None) -> None:
-    """Always succeeds from the caller's point of view (no account enumeration)."""
-    user = User.objects.filter(email=User.objects.normalize_email(email), is_active=True).first()
+    """Always succeeds from the caller's point of view."""
+    user = User.objects.filter(
+        email=User.objects.normalize_email(email),
+        is_active=True,
+    ).first()
+
     if user is None or not user.has_usable_password():
         return
-    record(Action.PASSWORD_RESET_REQUESTED, actor=None, entity=user, request=request)
-    # Queued, not sent inline: response time no longer differs between known and unknown
-    # emails, and SMTP failures are retried by the worker.
+
+    record(
+        Action.PASSWORD_RESET_REQUESTED,
+        actor=None,
+        entity=user,
+        request=request,
+    )
+
     from .tasks import send_password_reset_email
 
     try:
-        send_password_reset_email.delay(str(user.pk))
+        send_password_reset_email(str(user.pk))
     except Exception:
-        logger.exception("Could not queue password reset email", extra={"user_id": str(user.pk)})
+        logger.exception(
+            "Could not send password reset email",
+            extra={"user_id": str(user.pk)},
+        )
 
 
 def _user_from_reset_token(raw: str) -> User:
@@ -277,41 +304,98 @@ def update_profile(user: User, changes: dict, request=None) -> User:
 # --- Email verification ---------------------------------------------------------------------
 
 
+# def verify_email(raw_token: str, request=None) -> User:
+#     """Mark the address as verified. Idempotent: re-using a valid link changes nothing."""
+#     user = verification.user_from_token(raw_token)  # raises InvalidVerificationToken
+#     if user.is_email_verified:
+#         return user
+#     from .tasks import send_welcome_email
+
+#     with transaction.atomic():
+#         updated = User.objects.filter(pk=user.pk, email_verified_at__isnull=True).update(
+#             email_verified_at=timezone.now()
+#         )
+#         if updated:
+#             if user.role == User.Role.AGENT:
+#                 # Temporary: email verification currently also verifies agent profiles.
+#                 profile_updated = AgentProfile.objects.filter(user=user).exclude(
+#                     verification_status=AgentProfile.VerificationStatus.VERIFIED
+#                 ).update(verification_status=AgentProfile.VerificationStatus.VERIFIED)
+#                 if profile_updated:
+#                     invalidate_on_commit("agents")
+#             record(Action.EMAIL_VERIFIED, actor=user, entity=user, request=request)
+#             transaction.on_commit(lambda: _queue(send_welcome_email, user.pk), robust=True)
+#     user.refresh_from_db()
+#     return user
+
 def verify_email(raw_token: str, request=None) -> User:
-    """Mark the address as verified. Idempotent: re-using a valid link changes nothing."""
-    user = verification.user_from_token(raw_token)  # raises InvalidVerificationToken
+    """Mark the address as verified and send a welcome email after commit."""
+    user = verification.user_from_token(raw_token)
+
     if user.is_email_verified:
         return user
+
     from .tasks import send_welcome_email
 
     with transaction.atomic():
-        updated = User.objects.filter(pk=user.pk, email_verified_at__isnull=True).update(
-            email_verified_at=timezone.now()
-        )
+        updated = User.objects.filter(
+            pk=user.pk,
+            email_verified_at__isnull=True,
+        ).update(email_verified_at=timezone.now())
+
         if updated:
             if user.role == User.Role.AGENT:
-                # Temporary: email verification currently also verifies agent profiles.
-                profile_updated = AgentProfile.objects.filter(user=user).exclude(
+                profile_updated = AgentProfile.objects.filter(
+                    user=user
+                ).exclude(
                     verification_status=AgentProfile.VerificationStatus.VERIFIED
-                ).update(verification_status=AgentProfile.VerificationStatus.VERIFIED)
+                ).update(
+                    verification_status=AgentProfile.VerificationStatus.VERIFIED
+                )
+
                 if profile_updated:
                     invalidate_on_commit("agents")
-            record(Action.EMAIL_VERIFIED, actor=user, entity=user, request=request)
-            transaction.on_commit(lambda: _queue(send_welcome_email, user.pk), robust=True)
+
+            record(
+                Action.EMAIL_VERIFIED,
+                actor=user,
+                entity=user,
+                request=request,
+            )
+
+            transaction.on_commit(
+                lambda: _send_account_email(
+                    send_welcome_email,
+                    user.pk,
+                ),
+                robust=True,
+            )
+
     user.refresh_from_db()
     return user
 
 
+# def resend_verification(user: User | None, request=None) -> None:
+#     """
+#     Queue a fresh verification email. Silently does nothing for unknown, inactive or
+#     already-verified accounts, so the endpoint can't be used to probe which emails exist.
+#     """
+#     if user is None or not user.is_active or user.is_email_verified:
+#         return
+#     from .tasks import send_verification_email
+
+#     _queue(send_verification_email, user.pk)
+
 def resend_verification(user: User | None, request=None) -> None:
     """
-    Queue a fresh verification email. Silently does nothing for unknown, inactive or
-    already-verified accounts, so the endpoint can't be used to probe which emails exist.
+    Send a fresh verification email for an eligible account.
     """
     if user is None or not user.is_active or user.is_email_verified:
         return
+
     from .tasks import send_verification_email
 
-    _queue(send_verification_email, user.pk)
+    _send_account_email(send_verification_email, user.pk)
 
 
 def _queue(task, user_id) -> None:
@@ -320,3 +404,17 @@ def _queue(task, user_id) -> None:
     except Exception:
         # Broker unreachable: the user can press "resend" once it's back.
         logger.exception("Could not queue account email", extra={"task": task.name})
+
+
+def _send_account_email(function, user_id) -> None:
+    """Call a normal email function and log failures."""
+    try:
+        function(str(user_id))
+    except Exception:
+        logger.exception(
+            "Could not send account email",
+            extra={
+                "function": function.__name__,
+                "user_id": str(user_id),
+            },
+        )

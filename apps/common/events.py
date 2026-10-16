@@ -103,7 +103,8 @@ def _enqueue(event_id: str) -> None:
     from .tasks import dispatch_event
 
     try:
-        dispatch_event.delay(event_id)
+        # dispatch_event.delay(event_id)
+        dispatch_event(str(event_id))
     except Exception:
         # Broker down (e.g. mid Redis failover). The outbox row is committed and pending;
         # relay_pending_events will pick it up. The user's request is unaffected.
