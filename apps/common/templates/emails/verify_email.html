@@ -1,0 +1,18 @@
+{% extends "emails/base.html" %} {% block page_title %}Confirm your PLEET
+email{% endblock %} {% block preheader %}Confirm your email address to activate
+your PLEET account.{% endblock %} {% block content %}
+<h1 style="margin: 0 0 18px; font-size: 24px; line-height: 1.3; color: #19212b">
+  Confirm your email address
+</h1>
+<p style="margin: 0 0 14px; font-size: 15px; line-height: 1.7">
+  Hello {{ name }},
+</p>
+<p style="margin: 0 0 14px; font-size: 15px; line-height: 1.7">
+  Confirm this address to activate your {{ role }} account and continue to
+  PLEET.
+</p>
+<p style="margin: 0; font-size: 14px; line-height: 1.7; color: #52606d">
+  This link expires in {{ expires_hours }} hours. If you did not create this
+  account, you can ignore this email. No changes will be made.
+</p>
+{% endblock %} {% block button_label %}Confirm email{% endblock %}

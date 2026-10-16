@@ -1,0 +1,52 @@
+[project]
+name = "pleet-backend"
+version = "0.1.0"
+requires-python = ">=3.14"
+
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+extend-exclude = ["venv", "staticfiles", "media"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "DJ", "SIM", "RUF", "S"]
+ignore = [
+  "RUF012",  # mutable class attrs are idiomatic in Django Meta/admin classes
+]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**" = ["S101", "S105", "S106"]  # asserts and fake passwords are fine in tests
+"tests/**" = ["S101", "S105", "S106"]
+"**/migrations/**" = ["E501", "RUF"]
+"config/settings/*.py" = ["S105"]
+"apps/audit/services.py" = ["S105"]
+# Operator scripts: talk to localhost, run the docker CLI, use the documented demo password.
+"scripts/**" = ["S101", "S105", "S310", "S603", "S607"]  # action names like PASSWORD_RESET are not secrets
+
+[tool.ruff.lint.isort]
+known-first-party = ["apps", "config"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+testpaths = ["apps", "tests"]
+python_files = ["test_*.py"]
+addopts = "-ra --strict-markers"
+asyncio_default_fixture_loop_scope = "function"
+# Deprecations are errors: they're cheapest to fix the day they appear.
+filterwarnings = [
+  "error::DeprecationWarning",
+  "error::PendingDeprecationWarning",
+  # Third-party: daphne (imported by channels.testing) sets a Windows event-loop policy
+  # that Python 3.14 deprecates. Harmless on Linux/CI; remove once daphne is updated.
+  "ignore::DeprecationWarning:daphne",
+]
+
+[tool.coverage.run]
+source = ["apps", "config"]
+omit = ["*/migrations/*", "*/tests/*", "config/asgi.py", "config/wsgi.py"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+fail_under = 90  # CI gate

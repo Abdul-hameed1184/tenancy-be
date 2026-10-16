@@ -1,0 +1,11 @@
+PLEET - Confirm your email address
+
+Hello {{ name }},
+
+Confirm this address to activate your {{ role }} account and continue to PLEET:
+{{ action_url }}
+
+This link expires in {{ expires_hours }} hours. If you did not create this account, ignore this email. No changes will be made.
+
+PLEET
+{{ frontend_url }}

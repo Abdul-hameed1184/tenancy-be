@@ -1,0 +1,8 @@
+PLEET - {{ title }}
+
+Hello {{ name }},
+
+{{ message }}
+
+View this update in PLEET:
+{{ action_url }}

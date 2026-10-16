@@ -1,0 +1,8 @@
+-r base.txt
+pytest>=8.3
+pytest-django>=4.10
+pytest-asyncio>=0.25
+pytest-cov>=6
+factory-boy>=3.3
+coverage[toml]>=7.6
+ruff>=0.12

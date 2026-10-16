@@ -1,0 +1,8 @@
+PLEET - Your account is ready
+
+Hello {{ name }},
+
+Your email is confirmed and your {{ role }} account is ready to use.
+
+Open PLEET:
+{{ action_url }}

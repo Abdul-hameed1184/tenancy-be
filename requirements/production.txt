@@ -1,0 +1,5 @@
+-r base.txt
+# ASGI serving: gunicorn supervises uvicorn workers (HTTP + WebSocket).
+gunicorn>=23
+uvicorn[standard]>=0.34
+uvicorn-worker>=0.3
