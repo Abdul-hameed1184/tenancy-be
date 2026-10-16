@@ -1,8 +1,1 @@
 -r requirements/production.txt
-Django
-djangorestframework
-django-cors-headers
-dj-database-url
-psycopg[binary]
-celery
-redis

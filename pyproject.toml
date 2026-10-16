@@ -2,17 +2,10 @@
 name = "tenancy-backend"
 version = "0.1.0"
 requires-python = ">=3.12,<3.13"
-dependencies = [
-    "Django>=4.2,<5.0",
-    "djangorestframework",
-    "psycopg[binary]",
-    "celery",
-    "redis",
-]
 
 [tool.ruff]
 line-length = 100
-target-version = "py314"
+target-version = "py312"
 extend-exclude = ["venv", "staticfiles", "media"]
 
 [tool.ruff.lint]
