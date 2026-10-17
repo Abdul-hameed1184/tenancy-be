@@ -46,16 +46,25 @@ LOGGING["handlers"]["console"]["formatter"] = env.str("LOG_FORMAT", default="jso
 AUTH_REFRESH_COOKIE = {**AUTH_REFRESH_COOKIE, "secure": True}  # noqa: F405
 
 
+# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# EMAIL_HOST = env('EMAIL_HOST', default='smtp.gmail.com')
+# EMAIL_PORT = env('EMAIL_PORT', default=587)
+# EMAIL_USE_TLS = env('EMAIL_USE_TLS', default=True)
+# EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='[EMAIL_ADDRESS]')
+# EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='[PASSWORD]')
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = env('EMAIL_HOST', default='smtp.gmail.com')
-EMAIL_PORT = env('EMAIL_PORT', default=587)
-EMAIL_USE_TLS = env('EMAIL_USE_TLS', default=True)
-EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='[EMAIL_ADDRESS]')
-EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='[PASSWORD]')
 
-EMAIL_USE_SSL = env.bool("EMAIL_USE_SSL", default=False)
-EMAIL_TIMEOUT = env.int("EMAIL_TIMEOUT", default=10)
-DEFAULT_FROM_EMAIL = env.str("DEFAULT_FROM_EMAIL", default="allishittuabdulhameed@gmail.com")
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+
+EMAIL_HOST_USER = env("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
+
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
 if not EMAIL_HOST or not EMAIL_HOST_USER or not EMAIL_HOST_PASSWORD:
     raise ImproperlyConfigured(
         "EMAIL_HOST, EMAIL_HOST_USER, and EMAIL_HOST_PASSWORD must be configured in production."

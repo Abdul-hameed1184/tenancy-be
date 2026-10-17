@@ -165,7 +165,7 @@ EMAIL_VERIFICATION_TIMEOUT = env.int("EMAIL_VERIFICATION_TIMEOUT", default=3 * 2
 
 # Reset links are valid for one hour (Django's default is three days).
 PASSWORD_RESET_TIMEOUT = env.int("PASSWORD_RESET_TIMEOUT", default=60 * 60)
-DEFAULT_FROM_EMAIL = env.str("DEFAULT_FROM_EMAIL", default="PLEET <no-reply@pleet.local>")
+DEFAULT_FROM_EMAIL = env.str("DEFAULT_FROM_EMAIL")
 
 # --- Internationalisation -------------------------------------------------------------------
 
@@ -360,9 +360,15 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 CELERY_WORKER_HIJACK_ROOT_LOGGER = False  # workers use LOGGING above (JSON + redaction)
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = env('EMAIL_HOST', default='smtp.gmail.com')
-EMAIL_PORT = env('EMAIL_PORT', default=587)
-EMAIL_USE_TLS = env('EMAIL_USE_TLS', default=True)
-EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='[EMAIL_ADDRESS]')
-EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='[PASSWORD]')
+
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+
+EMAIL_HOST_USER = env("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
